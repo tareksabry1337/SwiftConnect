@@ -102,4 +102,12 @@ extension Future where Value == String {
 
 And you can keep chaining this as long as you want as long as you are matching the data types.
 
+Then you can simply chain the call by doing
+
+```swift
+Connect.default.request(ExampleConnector.target).asString().asURL().observe { result in
+//result here will be of type Result<URL?, Error>
+}
+```
+
 This plays very well with repository design pattern, maybe you can create a transformer that saves the data to your local db directly ? the possibilities are unlimited yet the code is very simple.
