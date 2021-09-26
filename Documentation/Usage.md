@@ -95,7 +95,9 @@ Under the hood, SwiftConnect uses `reflection` to resolve these parameters at ru
 * `@RawData`
 * `@Header`
 
-### What is Parameter?
+#### What is `@Query`?
+
+Query propertyWrapper is used to append query parameters to 
 
 Parameter is a simple enum that has three cases (query, path, jsonObject)
 
