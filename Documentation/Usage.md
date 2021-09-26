@@ -35,61 +35,65 @@ First and foremost SwiftConnect assumes a request is successful if it's status c
 
 If you don't provide ErrorHandler and just use the default implementation it's going to lookup the following keys (msg, messge, error, err) before giving up and throwing a generic error.
 
-#### Connector
+#### Module
 
-Connector is the core protocol that builds a network request.
+A module is very simple by definition it describes entities on your application, for example if you are building a social media application you'd have the following modules (Post, Story, Comment).
+Each module encapsulates bunch of requests for accessibility so that you don't need to remember request names by heart.
 
-Creating a new connector is very simple you just have to conform to Connector Protocol which has the following requirements
+Module protocol is simply defined as 
+
 ```swift
-public protocol Connector: Alamofire.URLRequestConvertible {
+public protocol Module {
+    var request: Requestable { get }
+}
+```
+
+Any conforming object should implement the `request` property which will be used to build the network request
+
+#### Requestable
+
+`Requestable` is the core protocol that builds a network request, it backs two different upper protocols (`Request`, `MultipartRequest`) with the former being used for the requests which are normal and the latter for the requests that has files
+
+Creating a new request is very simple you just have to conform to either `Request` / `MultipartRequest` protocol both requirements are inherited from the `Requestable` which is defined as below 
+
+```swift
+public protocol Requestable: Alamofire.URLRequestConvertible {
     var baseURL: URL { get }
     var endpoint: String { get }
     var method: HTTPMethod { get }
-    var headers: [HTTPHeader] { get }
-    var parameters: ParametersRepresentable? { get }
 }
 ```
 
-Let's take a look at an example Connector
+If you decide to implement `MultipartRequest` protocol you'll have an extra variable `files` which are used to pass in the files for the multipart request
+
+Let's take a look at an example Request
 ```swift
-enum TodoConnector: Connector {
+struct GetTodoRequest: Request {
     
-    case get(id: Int)
+    let baseURL = URL(string: "https://jsonplaceholder.typicode.com")!
+    let endpoint = "/todos/{id}"
+    let method: HTTPMethod = .get
     
-    var baseURL: URL {
-        return URL(string: "https://jsonplaceholder.typicode.com")!
-    }
+    @Path("id") private(set) var todoId: Int
     
-    var endpoint: String {
-        switch self {
-        case .get:
-            return "/todos/{id}"
-        }
-    }
-    
-    var method: HTTPMethod {
-        switch self {
-        case .get:
-            return .get
-        }
-    }
-    
-    var headers: [HTTPHeader] {
-        return []
-    }
-    
-    var parameters: ParametersRepresentable? {
-        switch self {
-        case .get(let id):
-            return Parameter.path(key: "id", value: "\(id)")
-        }
+    init(todoId: Int) {
+        self.todoId = todoId
     }
 }
 ```
 
-So all of these requirements are pretty self explantory except for one specific requirement (parameters).
+So all of these requirements are pretty self explantory except for one specific mystery that showed up `@Path` 
+For all of our Android friends you probably know what's the deal here but for our iOS friends who don't know what is `Retrofit` or how it works, I'll explain further on how all of this magic happens and what other types are supported
 
-SwiftConnect introduces two new types of parameters (Parameter / CompositeParameters)
+SwiftConnect introduces four types of `propertyWrappers` which can be used to add parameters / headers to your request.
+Under the hood, SwiftConnect uses `reflection` to resolve these parameters at run time, I know reflection is scary and everything but throughout my benchmarking the difference between explicitly defining parameters and resolving them in runtime via reflection was so negligible that I didn't even bother to build one gigantic file that conforms to `URLRequestConveritble` and grows vertically as the project grows 
+
+### Available propertyWrappers
+
+* `@Query`
+* `@Path`
+* `@RawData`
+* `@Header`
 
 ### What is Parameter?
 

@@ -7,6 +7,7 @@
 
 But that's not really where SwiftConnect shines, at its core it's very simple but the exposed APIs are very powerful what differs SwiftConnect from any other library
 
+- [x] Expressive in parameters (Think retrofit)
 - [x] Path Parameters support
 - [x] Powerful chaining based on Futures / Promises
 

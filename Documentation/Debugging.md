@@ -2,7 +2,7 @@
 
 ### Debugging Network Requests
 
-Debugging network requests can be a real bane and nightmare, the famous phrase that we always hear "It works on Postman" its your own fault but Connect makes debugging network requests really easy.
+Debugging network requests can be a real bane and nightmare, the famous phrase that we always hear "It works on Postman" and it's your own fault but SwiftConnect makes debugging network requests really easy.
 First of all any request that goes out of your device will be logged to the console automatically and can be seen in this format
 
 ```bash
@@ -20,14 +20,15 @@ This makes it really easy to find out what's wrong with your request at glance, 
 Further more if you want to debug the response Connect provides a parameter called "debugResponse" in the following methods
 
 ```swift
-public func request(_ request: Connector, debugResponse: Bool = false) -> Future<Data>
-public func upload(files: [File]?, to request: Connector, debugResponse: Bool = false) -> Future<Data>
+public func request(request: Requestable, debugResponse: Bool = false) -> Future<Data>
+public func request(multipartRequest: Requestable, debugResponse: Bool = false) -> Future<Data>
 ```
 If you flip the switch and toggle debugResponse to true (it's defaulted to false) the entire response will be printed to the console whether it's success or failure allowing for a better visibility when debugging.
 
 For example calling
+
 ```swift
-Connect.default.request(TodoConnector.get(id: 123), debugResponse: true).decoded(toType: Todo.self)
+Connect.default.request(request: TodoModule.get(id:123).request, debugResponse: true).decoded(toType: Todo.self)
 ```
 
 Will result into the following output to the console
