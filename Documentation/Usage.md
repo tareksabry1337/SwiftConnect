@@ -287,7 +287,7 @@ extension MimeType {
 Connect allows you to either do a normal request or do an upload task and it's defined with the following method signatures
 ```swift
 public func request(request: Request, debugResponse: Bool = false) -> Future<Data>
-public func upload(multipartRequest: MultipartRequest, debugResponse: Bool = false) -> Future<Data>
+public func request(multipartRequest: MultipartRequest, debugResponse: Bool = false) -> Future<Data>
 ```
 
 After doing all the chaining for Future you finally call .observe which is an async closure that has one variable Result<Type, Error> whereas  the Type is the final data type returned from your Futures Chain.
