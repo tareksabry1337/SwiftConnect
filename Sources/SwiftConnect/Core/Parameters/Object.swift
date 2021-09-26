@@ -43,7 +43,7 @@ public struct Object<T: Encodable> {
         }
     }
     
-    init(encoder: JSONEncoder = JSONEncoder(), encoding: ParameterEncoding) {
+    public init(encoder: JSONEncoder = JSONEncoder(), encoding: ParameterEncoding) {
         self.encoder = encoder
         self.encoding = encoding
     }

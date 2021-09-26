@@ -40,7 +40,7 @@ public struct Query<T: CustomStringConvertible> {
         }
     }
     
-    init(_ key: String, encoding: URLEncoding = .default) {
+    public init(_ key: String, encoding: URLEncoding = .default) {
         self.key = key
         self.encoding = encoding
         self.value = ""

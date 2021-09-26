@@ -40,7 +40,7 @@ public struct Path<T: CustomStringConvertible> {
         }
     }
     
-    init(_ key: String, encoding: PathEncoding = .default) {
+    public init(_ key: String, encoding: PathEncoding = .default) {
         self.key = key
         self.encoding = encoding
         self.value = ""
