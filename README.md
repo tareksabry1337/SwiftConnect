@@ -28,7 +28,7 @@ SwiftConnect is a lightweight network abstraction layer, built on top of Alamofi
 ## Requirements
 
 - iOS 10.0+
-- Xcode 11+
+- Xcode 12+
 - Swift 5.0+
 
 ## Installation
