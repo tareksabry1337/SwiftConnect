@@ -88,7 +88,7 @@ For all of our Android friends you probably know what's the deal here but for ou
 SwiftConnect introduces four types of `propertyWrappers` which can be used to add parameters / headers to your request.
 Under the hood, SwiftConnect uses `reflection` to resolve these parameters at run time, I know reflection is scary and everything but throughout my benchmarking the difference between explicitly defining parameters and resolving them in runtime via reflection was so negligible that I didn't even bother to build one gigantic file that conforms to `URLRequestConveritble` and grows vertically as the project grows 
 
-#### Available propertyWrappers
+### Available propertyWrappers
 
 * `@Query`
 * `@Path`
@@ -105,6 +105,37 @@ init(_ key: String, encoding: URLEncoding = .default)
 ```
 
 It accepts two parameters, the first being the key that will be appended to the request and the encoding which is defaulted to `URLEncoding.default`, if you wish to customize how it's encoded you can pass another instance of `URLEncoding` I.E (brackets vs no brackets / boolean encoding literal vs non-literal)
+
+Parameter is a simple enum that has three cases (query, path, jsonObject)
+
+```swift
+public enum Parameter: ParametersRepresentable {
+    case query(key: String, value: String)
+    case path(key: String, value: String)
+    case jsonObject(value: Encodable)
+}
+```
+
+#### What is `@Path`?
+
+Path propertyWrapper is used to append path parameters to the request.
+Its constructor is defined as following
+
+```swift
+init(_ key: String, encoding: PathEncoding = .default)
+```
+
+It accepts two parameters, the first being the key that will be appended to the request and the encoding which is defaulted to `PathEncoding.default`, if you wish to customize how it's encoded you can pass another instance of `PathEncoding`
+
+`PathEncoding` itself is a new addition from SwiftConnect which adds the ability to define how do you want your path parameters to be parsed, the default pattern that's detected is `{key}` so looking at the example request above it defines its endpoint as `"/todos/{id}"` at run time, the pattern that will be matched against is anything surrounded by curly braces and will be replaced by the respective value, given that the passed `key` to `@Path` matches the value in the string.
+
+If you want to customize how the keys are replaced simply create a new instance from `PathEncoding` like the following
+
+```swift
+PathEncoding(pattern: "##key##")
+```
+
+Then at your request we'll edit the endpoint to be from `"/todos/{id}"` to `"/todos/##id##"`, so it's totally up to you how to define it, just make sure that the path paremeters key is matched with with their respctive values in the endpoint.
 
 Parameter is a simple enum that has three cases (query, path, jsonObject)
 
