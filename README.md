@@ -20,7 +20,7 @@ SwiftConnect is a lightweight network abstraction layer, built on top of Alamofi
     - [Error Handler](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#ErrorHandler)
     - [Requestable](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#Requestable)
     - [Available propertyWarppers](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#Available-propertyWrappers)
-    - [What is `@Query`?](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#What-is-`@Query`?)
+    - [What is `@Query`?](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#What-is-query)
     - [What is CompositeParameters?](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#What-is-CompositeParameters)
     - [AuthorizedConnector](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#AuthorizedConnector)
     - [File](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#File)

@@ -97,7 +97,14 @@ Under the hood, SwiftConnect uses `reflection` to resolve these parameters at ru
 
 #### What is `@Query`?
 
-Query propertyWrapper is used to append query parameters to 
+Query propertyWrapper is used to append query parameters to the request.
+Its constructor is defined as following
+
+```swift
+init(_ key: String, encoding: URLEncoding = .default)
+```
+
+It accepts two parameters, the first being the key that will be appended to the request and the encoding which is defaulted to `URLEncoding.default`, if you wish to customize how it's encoded you can pass another instance of `URLEncoding` I.E (brackets vs no brackets / boolean encoding literal vs non-literal)
 
 Parameter is a simple enum that has three cases (query, path, jsonObject)
 
