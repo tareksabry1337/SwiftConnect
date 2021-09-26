@@ -50,7 +50,7 @@ public protocol Module {
 
 Any conforming object should implement the `request` property which will be used to build the network request
 
-#### Requestable
+##### Requestable
 
 `Requestable` is the core protocol that builds a network request, it backs two different upper protocols (`Request`, `MultipartRequest`) with the former being used for the requests which are normal and the latter for the requests that has files
 
@@ -88,7 +88,7 @@ For all of our Android friends you probably know what's the deal here but for ou
 SwiftConnect introduces four types of `propertyWrappers` which can be used to add parameters / headers to your request.
 Under the hood, SwiftConnect uses `reflection` to resolve these parameters at run time, I know reflection is scary and everything but throughout my benchmarking the difference between explicitly defining parameters and resolving them in runtime via reflection was so negligible that I didn't even bother to build one gigantic file that conforms to `URLRequestConveritble` and grows vertically as the project grows 
 
-### Available propertyWrappers
+#### Available propertyWrappers
 
 * `@Query`
 * `@Path`
