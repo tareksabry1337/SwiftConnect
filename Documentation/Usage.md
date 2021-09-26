@@ -137,23 +137,9 @@ PathEncoding(pattern: "##key##")
 
 Then at your request we'll edit the endpoint to be from `"/todos/{id}"` to `"/todos/##id##"`, so it's totally up to you how to define it, just make sure that the path paremeters key is matched with with their respctive values in the endpoint.
 
-Parameter is a simple enum that has three cases (query, path, jsonObject)
+#### What is `@RawData`?
 
-```swift
-public enum Parameter: ParametersRepresentable {
-    case query(key: String, value: String)
-    case path(key: String, value: String)
-    case jsonObject(value: Encodable)
-}
-```
-
-Assuming your request requires only one parameter you may return one of these for the parameters property.
-
-The query type will append the parameter to url query components whereas the path parameter will look for the specified key in the URL and replace it with the specified value, I.E if you pass Parameter.path(key: "id", value: "123") for the parameters (as in the example above) SwiftConnect will look for {id} in the Endpoint and replace it with 123
-
-**You must make sure you match the path parameters key with their respective values in the URL**
-
-And finally passing Parameter.jsonObject(someJSONObject) will encode the given object and send it in the body of the request.
+RawData propertyWrapper is used to send raw data without anything else, which means if you have RawData in your request it'll simple override everything internally it sets the httpBody value of the request
 
 ### What is CompositeParameters?
 
