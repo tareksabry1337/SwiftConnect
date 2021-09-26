@@ -11,6 +11,8 @@ public extension Future where Value == Data {
 
 A very simple transformer that creates a decodable model from given data and it supports keypath as well.
 
+-
+
 #####  What is keypath support when it comes to JSONDecoding ?
 
 Say you have a `Item` model
