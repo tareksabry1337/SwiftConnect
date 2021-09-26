@@ -59,6 +59,7 @@ Please, don't hesitate to [file an issue](https://github.com/tareksabry1337/Swif
 - [ ] OAuth2 Support
 - [ ] Support for downloading tasks
 - [ ] Support for handling refresh tokens.
+- [ ] Async / Await support
 
 ## Dependncies
 SwiftConnect depends mainly on two things
