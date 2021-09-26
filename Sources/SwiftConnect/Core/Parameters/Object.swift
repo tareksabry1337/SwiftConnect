@@ -33,7 +33,9 @@ struct Object<T: Encodable> {
     
     var wrappedValue: T {
         get {
-            return value as! T
+            guard let value = value as? T else {
+                fatalError("Undefined object in request, must pass value for the encodable object")
+            }
         } set {
             value = newValue
         }

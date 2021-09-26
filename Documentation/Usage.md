@@ -85,7 +85,7 @@ struct GetTodoRequest: Request {
 So all of these requirements are pretty self explantory except for one specific mystery that showed up `@Path` 
 For all of our Android friends you probably know what's the deal here but for our iOS friends who don't know what is `Retrofit` or how it works, I'll explain further on how all of this magic happens and what other types are supported
 
-SwiftConnect introduces four types of `propertyWrappers` which can be used to add parameters / headers to your request.
+SwiftConnect introduces five types of `propertyWrappers` which can be used to add parameters / headers to your request.
 Under the hood, SwiftConnect uses `reflection` to resolve these parameters at run time, I know reflection is scary and everything but throughout my benchmarking the difference between explicitly defining parameters and resolving them in runtime via reflection was so negligible that I didn't even bother to build one gigantic file that conforms to `URLRequestConveritble` and grows vertically as the project grows 
 
 ### Available propertyWrappers
@@ -93,6 +93,7 @@ Under the hood, SwiftConnect uses `reflection` to resolve these parameters at ru
 * `@Query`
 * `@Path`
 * `@RawData`
+* `@Object`
 * `@Header`
 
 #### What is `@Query`?
@@ -106,15 +107,7 @@ init(_ key: String, encoding: URLEncoding = .default)
 
 It accepts two parameters, the first being the key that will be appended to the request and the encoding which is defaulted to `URLEncoding.default`, if you wish to customize how it's encoded you can pass another instance of `URLEncoding` I.E (brackets vs no brackets / boolean encoding literal vs non-literal)
 
-Parameter is a simple enum that has three cases (query, path, jsonObject)
-
-```swift
-public enum Parameter: ParametersRepresentable {
-    case query(key: String, value: String)
-    case path(key: String, value: String)
-    case jsonObject(value: Encodable)
-}
-```
+Any variable preceded by `@Query` must conform to `CustomStringConveritbleProtocol`
 
 #### What is `@Path`?
 
@@ -141,62 +134,84 @@ Then at your request we'll edit the endpoint to be from `"/todos/{id}"` to `"/to
 
 RawData propertyWrapper is used to send raw data without anything else, which means if you have RawData in your request it'll simple override everything internally it sets the httpBody value of the request
 
-### What is CompositeParameters?
+It has no defined constructor, you just pass in the data you want and it'll inject it into the URLRequest
 
-CompositeParameters is a very basic, yet powerful data structure that allows you to compose different parameters for your request. Let's take a look about how can we make use of this to construct a request with different parameter types without any string manipulation (in case of path parameters) in order to create a request.
+#### What is `@Object`?
+
+Object propertyWrapper is the most complex one of all of them because it's used to send encodable objects in the request.
+Its constructor is defined as following
+
+```swift
+init(encoder: JSONEncoder = JSONEncoder(), encoding: ParameterEncoding)
+```
+
+It has one default argument which is the encoder, if you want to customize how the object is encoded you can provide your own customized JSONEncoder, by default SwiftConnect includes and extension for both `JSONDecoder`, `JSONEncoder` which are `.snakeCaseDecoder` and `.snakeCaseEncoder` respectively, since this is very common case.
+
+You can even create a big object and pass it all to the query parameters if needed by setting the encoding to be URLEncoding.default.
+
+#### What is `@Header`?
+
+Header propertyWrapper is used to add headers to your request (non-authorization headers, we'll get to the authorizaton shortly)
+
+Its constructor is defined as following
+
+```swift
+init(_ key: String)
+```
+
+You just need to pass the key that'll be appended to headers and set the value, then the header will be injected at the time of building the request
+
+### Creating complex request
+
+Creating complex requests can be very complex when it comes to real life project
+
+SwiftConnect introduces combination of propertyWrappers above to compose different parameters for your request. Let's take a look about how can we make use of this to construct a request with different parameter types without any string manipulation (in case of path parameters) in order to create a request.
 
 Let's assume the following URL 
 
 https://myserver.com/users/1/todos/5?action=done
 
-And also let's assume you need to pass a json object as well in the parameters. Can you imagine the nightmares ? constructing this URL will be very complex but with CompositeParameters it's very very simple. Let's take a look at example Connector that does this.
+And also let's assume you need to pass a json object in the parameters / pecial header (because why not ?)
+Can you imagine the nightmares ? constructing this Request will be very complex but with propertyWrappers it's very very simple. Let's take a look at example Request that does this.
 
 ```swift
+struct Todo: Encodable {
+    let title: String
+    let isCompleted: Bool
+}
+
 enum TodoAction: String {
     case update
 }
 
-enum AdvancedTodoConnector: Connector {
+extension TodoAction: CustomStringConvertible {
     
-    case update(userId: Int, todoId: Int, action: TodoAction, object: Encodable)
-    
-    var baseURL: URL {
-        return URL(string: "https://myserver.com")!
+    var description: String {
+        return rawValue
     }
     
-    var endpoint: String {
-        switch self {
-        case .update:
-            return "/users/{userId}/todos/{todoId}"
-        }
-    }
+}
+
+struct UpdateTodoRequest: Request {
+    let baseURL = URL(string: "https://myserver.com")!
+    let endpoint = "/users/{userId}/todos/{todoId}"
+    let method: HTTPMethod = .put
     
-    var method: HTTPMethod {
-        switch self {
-        case .update:
-            return .put
-        }
-    }
+    @Path("userId") private(set) var userId: Int
+    @Path("todoId") private(set) var todoId: Int
+    @Query("action", encoding: URLEncoding(destination: .queryString)) private(set) var action: TodoAction //Note here we defined an explicit encoding because by default if method is not get it'll replace the body
+    @Object(encoding: JSONEncoding.default) private(set) var todo: Todo
     
-    var headers: [HTTPHeader] {
-        return []
-    }
-    
-    var parameters: ParametersRepresentable? {
-        switch self {
-        case .update(let userId, let todoId, let action, let object):
-            return CompositeParameters(
-                .path(key: "userId", value: "\(userId)"),
-                .path(key: "todoId", value: "\(todoId)"),
-                .query(key: "action", value: action.rawValue),
-                .jsonObject(value: object)
-            )
-        }
+    init(userId: Int, todoId: Int, action: TodoAction, todo: Todo) {
+        self.userId = userId
+        self.todoId = todoId
+        self.action = action
+        self.todo = todo
     }
 }
 ```
 
-Calling this Connector will result into this call
+Calling this Request will result into this call
 
 ```bash
 =======================================
@@ -206,26 +221,29 @@ $ curl -v \
     -H "Accept-Language: en-US;q=1.0, ar-US;q=0.9, en;q=0.8" \
     -H "Accept-Encoding: br;q=1.0, gzip;q=0.9, deflate;q=0.8" \
     -H "Content-Type: application/json" \
-    -d "{\"userId\":2,\"id\":1,\"title\":\"Test Todo\",\"completed\":false}" \
-    "https://myserver.com/users/1/todos/2?action=update"
+    -d "{\"isCompleted\":true,\"title\":\"test\"}" \
+    "https://myserver.com/users/123/todos/1234?action=update"
 =======================================
 ```
 
-#### AuthorizedConnector
+Simple, yet elegant !
 
-AuthorizedConnector is a very simple protocol which has the following requirements
+#### AuthorizedRequest
+
+AuthorizedRequest is a very simple protocol which has the following requirements
+
 ```swift
-public protocol AuthorizedConnector {
+public protocol AuthorizedRequest {
     var authorizationToken: AuthorizationToken? { get }
 }
 ```
-The role of AuthorizedConnector is basically allow any connector to send the specified authorization token if the route that you are requesting is authenticated (say goodbye to hardcoding those stuff in the headers !)
-You may return an AuthorizationToken if your route requires authentication or nil if the route is unauthenticated.
+The role of AuthorizedRequest is basically allow any request to send the specified authorization token if the route that you are requesting is authenticated (say goodbye to hardcoding those stuff in the headers !)
+You may return an AuthorizationToken if your request requires authentication or nil if the route is unauthenticated.
 
 AuthorizationToken is another simple enum that contains only three cases
 ```swift
 public enum AuthorizationToken {
-    case bearer(token: String), basic(username: String, password: String), custom(token: String)
+    case bearer(token: String), basic(username: String, password: String), custom(key: String, token: String)
 }
 ```
 So in nutshell, SwiftConnect supports Bearer, Basic, Custom authentication.
@@ -268,15 +286,15 @@ extension MimeType {
 #### Using Connect
 Connect allows you to either do a normal request or do an upload task and it's defined with the following method signatures
 ```swift
-public func request(_ request: Connector, debugResponse: Bool = false) -> Future<Data>
-public func upload(files: [File]?, to request: Connector, debugResponse: Bool = false) -> Future<Data>
+public func request(request: Request, debugResponse: Bool = false) -> Future<Data>
+public func upload(multipartRequest: MultipartRequest, debugResponse: Bool = false) -> Future<Data>
 ```
 
 After doing all the chaining for Future you finally call .observe which is an async closure that has one variable Result<Type, Error> whereas  the Type is the final data type returned from your Futures Chain.
 
-##### Example for the Connector provided above
+##### Example for the Request provided above
 ```swift
-Connect.default.request(TodoConnector.get(id: 123), debugResponse: true).decoded(toType: Todo.self).observe { result in
+Connect.default.request(request: GetTodoRequest(id: 123), debugResponse: true).decoded(toType: Todo.self).observe { result in
     switch result {
     case .success(let todo):
         print(todo)

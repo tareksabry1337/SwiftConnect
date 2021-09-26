@@ -27,12 +27,18 @@ import Foundation
 extension URL {
 
     func withPathParameters(pattern: String, parameters: [String: Any]?) -> URL {
-        guard var urlString = absoluteString.removingPercentEncoding, let parameters = parameters else { return self }
+        guard
+            let parameters = parameters,
+            var urlSafePattern = pattern.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        else {
+            return self
+        }
+        
+        var urlString = absoluteString
         
         for parameter in parameters {
-            var pattern = pattern
-            pattern = pattern.replacingOccurrences(of: "key", with: parameter.key)
-            urlString = urlString.replacingOccurrences(of: pattern, with: "\(parameter.value)")
+            urlSafePattern = urlSafePattern.replacingOccurrences(of: "key", with: parameter.key)
+            urlString = urlString.replacingOccurrences(of: urlSafePattern, with: "\(parameter.value)")
         }
 
         guard let url = URL(string: urlString) else { return self }
@@ -40,14 +46,20 @@ extension URL {
     }
 
     func withPathParameter(pattern: String, _ key: String, value: Any) -> URL {
-        guard var urlString = absoluteString.removingPercentEncoding else { return self }
-
-        var pattern = pattern
-        pattern = pattern.replacingOccurrences(of: "key", with: key)
-        urlString = urlString.replacingOccurrences(of: pattern, with: "\(value)")
+        guard
+            var urlSafePattern = pattern.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        else {
+            return self
+        }
+        
+        var urlString = absoluteString
+        
+        urlSafePattern = pattern.replacingOccurrences(of: "key", with: key)
+        urlString = urlString.replacingOccurrences(of: urlSafePattern, with: "\(value)")
 
         guard let url = URL(string: urlString) else { return self }
         return url
     }
 
 }
+
