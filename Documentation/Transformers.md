@@ -72,6 +72,12 @@ public extension Future where Value == Data {
 
 With void transformer you may want to ignore the content of the response altogether and just care about its error in case of a failure therefore the void transformer is created specifically for that.
 
+#### Reactive Transformers
+
+SwiftConnect comes with reactive transformers for both the most famous Reactive programming libraries in Swift [RxSwift](https://github.com/ReactiveX/RxSwift) and [Bond](https://github.com/DeclarativeHub/Bond)
+
+Do you use another library that's not listed here ? Just roll out your own transformer and submit a PR !
+
 #### Creating your own transformer
 
 The core power of SwiftConnect is the ability to create your own transformers which makes it very extendible.
@@ -111,9 +117,3 @@ Connect.default.request(request: ExampleModule.example.request).asString().asURL
 ```
 
 This plays very well with repository design pattern, maybe you can create a transformer that saves the data to your local db directly ? the possibilities are unlimited yet the code is very simple.
-
-#### Reactive Transformers
-
-SwiftConnect comes with reactive transformers for both the most famous Reactive programming libraries in Swift [RxSwift](https://github.com/ReactiveX/RxSwift) and [Bond](https://github.com/DeclarativeHub/Bond)
-
-Do you use another library that's not listed here ? Just roll out your own transformer and submit a PR !
