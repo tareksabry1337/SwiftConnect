@@ -35,21 +35,6 @@ First and foremost SwiftConnect assumes a request is successful if it's status c
 
 If you don't provide ErrorHandler and just use the default implementation it's going to lookup the following keys (msg, messge, error, err) before giving up and throwing a generic error.
 
-#### Module
-
-A module is very simple by definition it describes entities on your application, for example if you are building a social media application you'd have the following modules (Post, Story, Comment).
-Each module encapsulates bunch of requests for accessibility so that you don't need to remember request names by heart.
-
-Module protocol is simply defined as 
-
-```swift
-public protocol Module {
-    var request: Requestable { get }
-}
-```
-
-Any conforming object should implement the `request` property which will be used to build the network request
-
 ##### Requestable
 
 `Requestable` is the core protocol that builds a network request, it backs two different upper protocols (`Request`, `MultipartRequest`) with the former being used for the requests which are normal and the latter for the requests that has files
@@ -199,7 +184,8 @@ struct UpdateTodoRequest: Request {
     
     @Path("userId") private(set) var userId: Int
     @Path("todoId") private(set) var todoId: Int
-    @Query("action", encoding: URLEncoding(destination: .queryString)) private(set) var action: TodoAction //Note here we defined an explicit encoding because by default if method is not get it'll replace the body
+    //Note here we defined an explicit encoding because by default if method is not get it'll replace the body
+    @Query("action", encoding: URLEncoding(destination: .queryString)) private(set) var action: TodoAction
     @Object(encoding: JSONEncoding.default) private(set) var todo: Todo
     
     init(userId: Int, todoId: Int, action: TodoAction, todo: Todo) {
@@ -304,3 +290,21 @@ Connect.default.request(request: GetTodoRequest(id: 123), debugResponse: true).d
 }
 ```
 The observe closure here will be of type Result<Todo, Error>
+
+### Module
+
+A module is very simple by definition it describes entities on your application, for example if you are building a social media application you'd have the following modules (Post, Story, Comment).
+Each module encapsulates bunch of requests for accessibility so that you don't need to remember request names by heart.
+
+Module protocol is simply defined as 
+
+```swift
+public protocol Module {
+    var request: Requestable { get }
+}
+```
+
+Any conforming object should implement the `request` property which will be used to build the network request
+
+#### Building Modules
+

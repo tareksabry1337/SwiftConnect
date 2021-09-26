@@ -26,9 +26,11 @@ SwiftConnect is a lightweight network abstraction layer, built on top of Alamofi
     - [What is `@Object`?](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#What-is-object)
     - [What is `@Header`?](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#What-is-header)
     - [Creating Complex Request](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#creating-complex-request)
-    - [AuthorizedConnector](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#AuthorizedConnector)
+    - [AuthorizedRequest](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#AuthorizedRequest)
     - [File](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#File)
     - [Using Connect](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#Using-Connect)
+    - [Module](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#Module)
+    - [Building Modules](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#Building-Modules)
 - [Debugging](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Debugging.md)
 
 ## Requirements
