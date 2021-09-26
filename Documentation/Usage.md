@@ -302,7 +302,6 @@ public func request(multipartRequest: MultipartRequest, debugResponse: Bool = fa
 
 After doing all the chaining for Future you finally call .observe which is an async closure that has one variable Result<Type, Error> whereas  the Type is the final data type returned from your Futures Chain.
 
----
 
 ##### Example for the Request provided above
 ```swift
@@ -336,3 +335,77 @@ Any conforming object should implement the `request` property which will be used
 
 #### Building Modules
 
+Let's take the example above and build a Post module that will encapsulate all requests related to `Post` module in our social media apps.
+Implementaion will look seomthing like this
+
+```swift
+enum PostEndpoints {
+    static let post = "/posts/{postId}"
+    static let posts = "/posts"
+}
+```
+
+```swift
+struct GetPost: Request {
+    
+    let baseURL: URL = URL(string: "https://www.myserver.com")!
+    let endpoint: String = PostEndpoints.post
+    let method: HTTPMethod = .get
+    
+    @Path("postId") private(set) var postId: String
+    
+    init(postId: String) {
+        self.postId = postId
+    }
+}
+```
+
+```swift
+struct CreatePost: MultipartRequest {
+    
+    let baseURL: URL = URL(string: "https://www.myserver.com")!
+    let endpoint: String = PostEndpoints.posts
+    let method: HTTPMethod = .post
+    
+    let files: [File]
+    @Object(encoding: JSONEncoding.default) private(set) var post: Post
+    
+    init(files: [File], post: Post) {
+        self.files = files
+        self.post = post
+    }
+    
+}
+```
+
+
+```swift
+enum PostModule: Module {
+    
+    case get(postId: String)
+    case create(files: [File], post: Post)
+    
+    var request: Requestable {
+        switch self {
+        case .get(let postId):
+            return GetPost(postId: postId)
+            
+        case .create(let files, let parameters):
+            return CreatePost(files: files, post: parameters)
+        }
+    }
+    
+}
+```
+The above implementation will allow us simply to group all the requests under a related module for an easier accessibility.
+
+To use the above module you can simply do the following
+
+```swift
+let request = PostModule.get(postId: "123").request
+Connect.default.request(request: request, debugResponse: true).observe { result in
+    print(result)
+}
+```
+
+Building modules is totally optional and you are free to either do it or not, it's simply a better way to express your requests under a certain "namespace"
