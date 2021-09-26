@@ -11,8 +11,6 @@ public extension Future where Value == Data {
 
 A very simple transformer that creates a decodable model from given data and it supports keypath as well.
 
----
-
 #####  What is keypath support when it comes to JSONDecoding ?
 
 Say you have a `Item` model
@@ -52,6 +50,8 @@ let item = try decoder.decode(Item.self, from: jsonData, keyPath: "foo")
 
 This will eliminate all the boilerplate in your models and allows for a clear and concrete data structure
 
+---
+
 #### Dictionary Transformer
 ```swift
 public extension Future where Value == Data {
@@ -65,6 +65,8 @@ public extension Future where Value == Data {
 
 With dictionary transformer you may want to create a dictionary from the response and use it directly without mapping it to any model, or maybe even get a specific key from the dictionary it also supports keypaths (the separator is .) so you can do something like "get.some.key.thats.nested.deeply".
 
+---
+
 #### Void Transformer
 ```swift
 public extension Future where Value == Data {
@@ -74,11 +76,15 @@ public extension Future where Value == Data {
 
 With void transformer you may want to ignore the content of the response altogether and just care about its error in case of a failure therefore the void transformer is created specifically for that.
 
+---
+
 #### Reactive Transformers
 
 SwiftConnect comes with reactive transformers for both the most famous Reactive programming libraries in Swift [RxSwift](https://github.com/ReactiveX/RxSwift) and [Bond](https://github.com/DeclarativeHub/Bond)
 
 Do you use another library that's not listed here ? Just roll out your own transformer and submit a PR !
+
+---
 
 #### Creating your own transformer
 

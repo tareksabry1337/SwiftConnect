@@ -8,6 +8,8 @@ To start using SwiftConnect you must be aware of the following key concepts.
 
 Is the basic class that contains three functions (request / upload / cancelAllRequests) it can be instantiated directly using Connect() or you can customize its parameters, Its constructor contains two parameters (ConnectMiddleware / ErrorHandler) which will be discussed shortly. Or you can just use Connect.default to get the default implementation of SwiftConnect.
 
+---
+
 #### ConnectMiddleware
 
 ConnectMiddleware is a class that conforms to ConnectMiddlewareProtocol which has the following requirements
@@ -19,6 +21,8 @@ public protocol ConnectMiddlewareProtocol: RequestAdapter, RequestRetrier {
 Any class that implements ConnectMiddlewareProtocol must have the session variable and adapt the two protocols RequestAdapter / RequestRetier from Alamofire.
 
 The core of this class is mainly used for adapting requests / handling unauthorized states (currently SwiftConnect does not support that but it will support it in the near future) so if you want to roll your own implementation you are free to do so.
+
+---
 
 #### ErrorHandler
 
@@ -34,6 +38,8 @@ Error handling can be really tricky, it has no unified standards across all the 
 First and foremost SwiftConnect assumes a request is successful if it's status code is within the acceptable range (200..<300) but in case it fails and the error code is something that's unacceptable that's where the ErrorHandler kicks in and calls "handle(response: [String: Any])" and its your own responsibility to decide the error that will be thrown. You may even return nil in case you assume that the request is successful even when it failed (for some reason ?). 
 
 If you don't provide ErrorHandler and just use the default implementation it's going to lookup the following keys (msg, messge, error, err) before giving up and throwing a generic error.
+
+---
 
 ##### Requestable
 
@@ -73,6 +79,8 @@ For all of our Android friends you probably know what's the deal here but for ou
 SwiftConnect introduces five types of `propertyWrappers` which can be used to add parameters / headers to your request.
 Under the hood, SwiftConnect uses `reflection` to resolve these parameters at run time, I know reflection is scary and everything but throughout my benchmarking the difference between explicitly defining parameters and resolving them in runtime via reflection was so negligible that I didn't even bother to build one gigantic file that conforms to `URLRequestConveritble` and grows vertically as the project grows 
 
+---
+
 ### Available propertyWrappers
 
 * `@Query`
@@ -93,6 +101,8 @@ init(_ key: String, encoding: URLEncoding = .default)
 It accepts two parameters, the first being the key that will be appended to the request and the encoding which is defaulted to `URLEncoding.default`, if you wish to customize how it's encoded you can pass another instance of `URLEncoding` I.E (brackets vs no brackets / boolean encoding literal vs non-literal)
 
 Any variable preceded by `@Query` must conform to `CustomStringConveritbleProtocol`
+
+---
 
 #### What is `@Path`?
 
@@ -115,11 +125,15 @@ PathEncoding(pattern: "##key##")
 
 Then at your request we'll edit the endpoint to be from `"/todos/{id}"` to `"/todos/##id##"`, so it's totally up to you how to define it, just make sure that the path paremeters key is matched with with their respctive values in the endpoint.
 
+---
+
 #### What is `@RawData`?
 
 RawData propertyWrapper is used to send raw data without anything else, which means if you have RawData in your request it'll simple override everything internally it sets the httpBody value of the request
 
 It has no defined constructor, you just pass in the data you want and it'll inject it into the URLRequest
+
+---
 
 #### What is `@Object`?
 
@@ -134,6 +148,8 @@ It has one default argument which is the encoder, if you want to customize how t
 
 You can even create a big object and pass it all to the query parameters if needed by setting the encoding to be URLEncoding.default.
 
+---
+
 #### What is `@Header`?
 
 Header propertyWrapper is used to add headers to your request (non-authorization headers, we'll get to the authorizaton shortly)
@@ -145,6 +161,8 @@ init(_ key: String)
 ```
 
 You just need to pass the key that'll be appended to headers and set the value, then the header will be injected at the time of building the request
+
+---
 
 ### Creating complex request
 
@@ -214,6 +232,8 @@ $ curl -v \
 
 Simple, yet elegant !
 
+---
+
 #### AuthorizedRequest
 
 AuthorizedRequest is a very simple protocol which has the following requirements
@@ -233,6 +253,8 @@ public enum AuthorizationToken {
 }
 ```
 So in nutshell, SwiftConnect supports Bearer, Basic, Custom authentication.
+
+---
 
 #### File (for uploading tasks)
 
@@ -269,6 +291,8 @@ extension MimeType {
 }
 ```
 
+---
+
 #### Using Connect
 Connect allows you to either do a normal request or do an upload task and it's defined with the following method signatures
 ```swift
@@ -277,6 +301,8 @@ public func request(multipartRequest: MultipartRequest, debugResponse: Bool = fa
 ```
 
 After doing all the chaining for Future you finally call .observe which is an async closure that has one variable Result<Type, Error> whereas  the Type is the final data type returned from your Futures Chain.
+
+---
 
 ##### Example for the Request provided above
 ```swift
@@ -290,6 +316,8 @@ Connect.default.request(request: GetTodoRequest(id: 123), debugResponse: true).d
 }
 ```
 The observe closure here will be of type Result<Todo, Error>
+
+---
 
 ### Module
 
