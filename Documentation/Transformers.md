@@ -114,4 +114,6 @@ This plays very well with repository design pattern, maybe you can create a tran
 
 #### Reactive Transformers
 
-SwiftConnect comes with reactive transformers for both the most famous Reactive programming libraries in Swift [RxSwift] https://github.com/ReactiveX/RxSwift and [Bond] https://github.com/DeclarativeHub/Bond
+SwiftConnect comes with reactive transformers for both the most famous Reactive programming libraries in Swift [RxSwift](https://github.com/ReactiveX/RxSwift) and [Bond](https://github.com/DeclarativeHub/Bond)
+
+Do you use another library that's not listed here ? Just roll out your own transformer and submit a PR !
