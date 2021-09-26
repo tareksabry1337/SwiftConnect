@@ -36,6 +36,8 @@ struct Object<T: Encodable> {
             guard let value = value as? T else {
                 fatalError("Undefined object in request, must pass value for the encodable object")
             }
+            
+            return value
         } set {
             value = newValue
         }
