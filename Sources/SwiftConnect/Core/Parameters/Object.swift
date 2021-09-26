@@ -26,12 +26,12 @@ import Foundation
 import Alamofire
 
 @propertyWrapper
-struct Object<T: Encodable> {
-    var value: Encodable?
-    var encoder: JSONEncoder
-    var encoding: ParameterEncoding
+public struct Object<T: Encodable> {
+    public var value: Encodable?
+    public var encoder: JSONEncoder
+    public var encoding: ParameterEncoding
     
-    var wrappedValue: T {
+    public var wrappedValue: T {
         get {
             guard let value = value as? T else {
                 fatalError("Undefined object in request, must pass value for the encodable object")

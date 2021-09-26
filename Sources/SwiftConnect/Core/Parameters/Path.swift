@@ -26,13 +26,13 @@ import Foundation
 import Alamofire
 
 @propertyWrapper
-struct Path<T: CustomStringConvertible> {
+public struct Path<T: CustomStringConvertible> {
     
-    let key: String
-    let encoding: ParameterEncoding
-    private(set) var value: CustomStringConvertible
+    public let key: String
+    public let encoding: ParameterEncoding
+    public private(set) var value: CustomStringConvertible
     
-    var wrappedValue: T {
+    public var wrappedValue: T {
         get {
             return value as! T
         } set {
@@ -49,7 +49,7 @@ struct Path<T: CustomStringConvertible> {
 
 extension Path: StringParameter {
     
-    var type: StringParameterType {
+    public var type: StringParameterType {
         return .path
     }
     

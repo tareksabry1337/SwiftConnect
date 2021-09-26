@@ -26,12 +26,12 @@ import Foundation
 import Alamofire
 
 @propertyWrapper
-struct Header {
+public struct Header {
     
-    let key: String
-    private(set) var value: String
+    public let key: String
+    public private(set) var value: String
     
-    var wrappedValue: String {
+    public var wrappedValue: String {
         get {
             return value
         } set {
@@ -39,7 +39,7 @@ struct Header {
         }
     }
     
-    var projectedValue: HTTPHeader {
+    public var projectedValue: HTTPHeader {
         return .init(name: key, value: wrappedValue)
     }
     

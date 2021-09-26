@@ -25,10 +25,10 @@
 import Foundation
 
 @propertyWrapper
-struct RawData {
-    private(set) var value: Data
+public struct RawData {
+    public private(set) var value: Data
     
-    var wrappedValue: Data {
+    public var wrappedValue: Data {
         get {
             return value
         } set {

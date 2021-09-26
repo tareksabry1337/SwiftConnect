@@ -25,12 +25,12 @@
 import Foundation
 import Alamofire
 
-enum StringParameterType {
+public enum StringParameterType {
     case query
     case path
 }
 
-protocol StringParameter {
+public protocol StringParameter {
     var key: String { get }
     var type: StringParameterType { get }
     var value: CustomStringConvertible { get }
