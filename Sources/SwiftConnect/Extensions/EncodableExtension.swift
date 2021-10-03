@@ -1,5 +1,5 @@
 //
-//  ConnectEncodableExtension.swift
+//  EncodableExtension.swift
 //
 //  Copyright (c) 2020 Tarek Sabry
 //

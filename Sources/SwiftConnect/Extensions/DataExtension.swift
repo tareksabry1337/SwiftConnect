@@ -1,5 +1,5 @@
 //
-//  ConnectDataExtension.swift
+//  DataExtension.swift
 //
 //  Copyright (c) 2020 Tarek Sabry
 //

@@ -1,5 +1,5 @@
 //
-//  ConnectErrorExtension.swift
+//  ErrorExtension.swift
 //
 //  Copyright (c) 2020 Tarek Sabry
 //

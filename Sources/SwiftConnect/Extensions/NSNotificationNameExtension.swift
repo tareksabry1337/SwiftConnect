@@ -1,5 +1,5 @@
 //
-//  ConnectNSNotificationNameExtension.swift
+//  NSNotificationNameExtension.swift
 //
 //  Copyright (c) 2020 Tarek Sabry
 //
@@ -26,5 +26,4 @@ import Foundation
 
 extension NSNotification.Name {
     static let cancelRequest = NSNotification.Name(rawValue: "cancelRequest")
-    static let login = NSNotification.Name(rawValue: "login")
 }

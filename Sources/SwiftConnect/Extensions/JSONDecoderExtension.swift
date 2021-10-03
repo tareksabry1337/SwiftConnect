@@ -1,5 +1,5 @@
 //
-//  ConnectJSONDecoderExtension.swift
+//  JSONDecoderExtension.swift
 //
 //  Copyright (c) 2017 Alexandr Goncharov
 //

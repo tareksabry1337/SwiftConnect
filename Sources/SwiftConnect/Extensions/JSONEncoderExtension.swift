@@ -1,5 +1,5 @@
 //
-//  ConnectJSONEncoderExtension.swift
+//  JSONEncoderExtension.swift
 //  Starr Power
 //
 //  Created by Tarek Sabry on 01/04/2021.

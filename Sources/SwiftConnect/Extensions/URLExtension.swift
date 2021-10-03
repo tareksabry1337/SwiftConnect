@@ -1,5 +1,5 @@
 //
-//  ConnectURLExtension.swift
+//  URLExtension.swift
 //
 //  Copyright (c) 2020 Tarek Sabry
 //

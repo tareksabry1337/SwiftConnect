@@ -24,7 +24,7 @@
 
 #if canImport(Bond)
 import Foundation
-import Bond
+@_implementationOnly import Bond
 import ReactiveKit
 
 public extension Future {

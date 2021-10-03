@@ -1,5 +1,5 @@
 //
-//  ConnectDictionaryExtension.swift
+//  DictionaryExtension.swift
 //
 //  Copyright (c) 2020 Tarek Sabry
 //
