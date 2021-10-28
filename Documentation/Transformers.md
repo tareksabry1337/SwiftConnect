@@ -80,9 +80,79 @@ With void transformer you may want to ignore the content of the response altoget
 
 #### Reactive Transformers
 
-SwiftConnect comes with reactive transformers for both the most famous Reactive programming libraries in Swift [RxSwift](https://github.com/ReactiveX/RxSwift) and [Bond](https://github.com/DeclarativeHub/Bond)
+Do you like to use any reactive programming library ? (RxSwift / Bond / ReactiveSwift)
+SwiftConnect also supports transforming for its Future / Promise type to any kind of  `Observable`  you'd need
 
-Do you use another library that's not listed here ? Just roll out your own transformer and submit a PR !
+Here are two examples for such transformation
+
+```swift
+import Foundation
+import SwiftConnect
+import Bond
+import ReactiveKit
+
+public extension Future {
+    func asSignal() -> Signal<Value, Error> {
+        return Signal { observer in
+            self.observe { result in
+                switch result {
+                case .success(let value):
+                    observer.on(.next(value))
+                    observer.on(.completed)
+                    
+                case .failure(let error):
+                    observer.on(.failed(error))
+                }
+            }
+            return SimpleDisposable(isDisposed: false)
+        }
+    }
+}
+```
+
+```swift
+import Foundation
+import SwiftConnect
+import RxSwift
+
+public extension Future {
+    func asObservable() -> Observable<Value> {
+        return Observable.create { observer in
+
+            self.observe { result in
+                switch result {
+                case .success(let value):
+                    observer.onNext(value)
+                    observer.onCompleted()
+                    
+                case .failure(let error):
+                    observer.onError(error)
+                }
+            }
+
+            return Disposables.create {
+                self.cancel()
+            }
+        }
+    }
+}
+
+public extension Future {
+    func asSingle() -> Single<Value> {
+        asObservable()
+            .asSingle()
+    }
+}
+
+public extension Future {
+    func asCompletable() -> Completable {
+        asSingle()
+            .asCompletable()
+    }
+}
+```
+
+Super easy !
 
 ---
 
