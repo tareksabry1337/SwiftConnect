@@ -29,4 +29,11 @@ public struct File {
     public let key: String
     public let mimeType: MimeType
     public let data: Data
+    
+    public init(name: String, key: String, mimeType: MimeType, data: Data) {
+        self.name = name
+        self.key = key
+        self.mimeType = mimeType
+        self.data = data
+    }
 }
