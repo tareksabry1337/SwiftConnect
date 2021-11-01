@@ -26,14 +26,14 @@ import Foundation
 
 public struct MimeType: RawRepresentable, Equatable, Hashable {
 
-    static let jpg = MimeType(rawValue: "image/jpeg")
-    static let png = MimeType(rawValue: "image/png")
-    static let gif = MimeType(rawValue: "image/gif")
-    static let tiff = MimeType(rawValue: "image/tiff")
-    static let mp4 = MimeType(rawValue: "video/mp4")
-    static let pdf = MimeType(rawValue: "application/pdf")
-    static let mov = MimeType(rawValue: "video/quicktime")
-    static let binary = MimeType(rawValue: "application/octet-stream")
+    static public let jpg = MimeType(rawValue: "image/jpeg")
+    static public let png = MimeType(rawValue: "image/png")
+    static public let gif = MimeType(rawValue: "image/gif")
+    static public let tiff = MimeType(rawValue: "image/tiff")
+    static public let mp4 = MimeType(rawValue: "video/mp4")
+    static public let pdf = MimeType(rawValue: "application/pdf")
+    static public let mov = MimeType(rawValue: "video/quicktime")
+    static public let binary = MimeType(rawValue: "application/octet-stream")
 
     public let rawValue: String
 
