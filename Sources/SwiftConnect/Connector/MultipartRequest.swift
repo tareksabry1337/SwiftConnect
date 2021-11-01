@@ -30,7 +30,7 @@ public protocol MultipartRequest: Requestable {
     var parameters: [String: Any] { get }
 }
 
-extension MultipartRequest {
+public extension MultipartRequest {
     
     var parameters: [String: Any] {
         var parameters: [String: Any]? = [:]
