@@ -25,8 +25,8 @@
 import Foundation
 
 public struct File {
-    let name: String
-    let key: String
-    let mimeType: MimeType
-    let data: Data
+    public let name: String
+    public let key: String
+    public let mimeType: MimeType
+    public let data: Data
 }
