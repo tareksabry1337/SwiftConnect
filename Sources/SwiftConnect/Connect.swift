@@ -160,7 +160,7 @@ public final class Connect {
     
     public func request(request: Requestable, debugResponse: Bool = false) async throws -> Response {
         let dataTask = makeDataTask(request: request)
-        return try await execute(task: dataTask)
+        return try await execute(task: dataTask, debugResponse: debugResponse)
     }
     
     public func request(
@@ -168,7 +168,7 @@ public final class Connect {
         debugResponse: Bool = false
     ) async throws -> Response {
         let uploadTask = makeUploadTask(request: multipartRequest)
-        return try await execute(task: uploadTask)
+        return try await execute(task: uploadTask, debugResponse: debugResponse)
     }
     
     private func log(response: DataResponse<Data, AFError>) {
