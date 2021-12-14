@@ -166,7 +166,7 @@ You just need to pass the key that'll be appended to headers and set the value, 
 
 ### Creating complex request
 
-Creating complex requests can be very complex when it comes to real life project
+Creating complex requests can be very complex when it comes to real life projects
 
 SwiftConnect introduces combination of propertyWrappers above to compose different parameters for your request. Let's take a look about how can we make use of this to construct a request with different parameter types without any string manipulation (in case of path parameters) in order to create a request.
 
@@ -174,7 +174,7 @@ Let's assume the following URL
 
 https://myserver.com/users/1/todos/5?action=done
 
-And also let's assume you need to pass a json object in the parameters / pecial header (because why not ?)
+And also let's assume you need to pass a json object in the parameters (because why not ?)
 Can you imagine the nightmares ? constructing this Request will be very complex but with propertyWrappers it's very very simple. Let's take a look at example Request that does this.
 
 ```swift

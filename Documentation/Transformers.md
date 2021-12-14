@@ -4,8 +4,8 @@
 
 #### Codable Transformer
 ```swift
-public extension Future where Value == Data {
-    func decoded<NextValue: Decodable>(toType type: NextValue.Type, keyPath: String = "") -> Future<NextValue>
+public extension Response {
+    func decoded<Model: Decodable>(toType type: Model.Type, keyPath: String = "") throws -> Model
 }
 ```
 

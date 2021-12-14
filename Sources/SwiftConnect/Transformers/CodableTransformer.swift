@@ -24,42 +24,38 @@
 
 import Foundation
 
-public extension Future where Value == Response {
-    func decoded<NextValue: Decodable>(
-        toType type: NextValue.Type,
+public extension Response {
+    func decoded<Model: Decodable>(
+        toType type: Model.Type,
         using decoder: JSONDecoder = JSONDecoder(),
         keyPath: String = ""
-    ) -> Future<NextValue> {
-        return transformed { response in
-            do {
-                if keyPath.isEmpty {
-                    return try decoder.decode(NextValue.self, from: response.data)
-                } else {
-                    return try decoder.decode(NextValue.self, from: response.data, keyPath: keyPath)
-                }
-
-            } catch {
-                throw error
+    ) throws -> Model {
+        do {
+            if keyPath.isEmpty {
+                return try decoder.decode(Model.self, from: data)
+            } else {
+                return try decoder.decode(Model.self, from: data, keyPath: keyPath)
             }
+
+        } catch {
+            throw error
         }
     }
 
-    func decodedIfPresent<NextValue: Decodable>(
-        toType type: NextValue.Type,
+    func decodedIfPresent<Model: Decodable>(
+        toType type: Model.Type,
         using decoder: JSONDecoder = JSONDecoder(),
         keyPath: String = ""
-    ) -> Future<NextValue?> {
-        return transformed { response in
-            do {
-                if keyPath.isEmpty {
-                    return try decoder.decode(NextValue.self, from: response.data)
-                } else {
-                    return decoder.decodeIfPresent(NextValue.self, from: response.data, keyPath: keyPath)
-                }
-
-            } catch {
-                throw error
+    ) throws -> Model? {
+        do {
+            if keyPath.isEmpty {
+                return try decoder.decode(Model.self, from: data)
+            } else {
+                return decoder.decodeIfPresent(Model.self, from: data, keyPath: keyPath)
             }
+
+        } catch {
+            throw error
         }
     }
 }

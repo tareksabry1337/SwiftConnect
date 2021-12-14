@@ -24,19 +24,15 @@
 
 import Foundation
 
-public extension Future where Value == Response {
-    func asDictionary() -> Future<[String: AnyObject]> {
-        return transformed { response in
-            let jsonObject = try? JSONSerialization.jsonObject(with: response.data, options: .allowFragments)
-            return jsonObject as? [String: AnyObject] ?? [:]
-        }
+public extension Response {
+    func asDictionary() -> [String: AnyObject] {
+        let jsonObject = try? JSONSerialization.jsonObject(with: data, options: .allowFragments)
+        return jsonObject as? [String: AnyObject] ?? [:]
     }
 }
 
-public extension Future where Value == Response {
-    func get<NextValue>(key: String, ofType type: NextValue.Type) -> Future<NextValue?> {
-        return asDictionary().transformed { dictionary in
-            return dictionary.valueForKeyPath(keyPath: key) as? NextValue
-        }
+public extension Response {
+    func get<Value>(key: String, ofType type: Value.Type) -> Value? {
+        return asDictionary().valueForKeyPath(keyPath: key) as? Value
     }
 }
