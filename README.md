@@ -51,6 +51,10 @@ dependencies: [
 ]
 ```
 
+## Previous Versions
+
+SwiftConnect has move away from all closure based code and is now completely implemented using Swift's new shiny async / await, if you are still interested in the legacy version that supports iOS 10.0 please refer to the v2 branch instead for the documentation and installation
+
 ## Support
 
 Please, don't hesitate to [file an issue](https://github.com/tareksabry1337/SwiftConnect/issues/new) if you have questions.
