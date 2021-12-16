@@ -29,7 +29,7 @@ The core of this class is mainly used for adapting requests / handling unauthori
 ErrorHandler is a class that conforms to ErrorHandlerProtocol which has the following requirements
 ```swift
 public protocol ErrorHandlerProtocol {
-    func handle(response: [String: Any]) -> Error?
+    func handle(response: [String: Any]) throws
 }
 ```
 
@@ -166,7 +166,7 @@ You just need to pass the key that'll be appended to headers and set the value, 
 
 ### Creating complex request
 
-Creating complex requests can be very complex when it comes to real life project
+Creating complex requests can be very complex when it comes to real life projects
 
 SwiftConnect introduces combination of propertyWrappers above to compose different parameters for your request. Let's take a look about how can we make use of this to construct a request with different parameter types without any string manipulation (in case of path parameters) in order to create a request.
 
@@ -174,7 +174,7 @@ Let's assume the following URL
 
 https://myserver.com/users/1/todos/5?action=done
 
-And also let's assume you need to pass a json object in the parameters / pecial header (because why not ?)
+And also let's assume you need to pass a json object in the parameters (because why not ?)
 Can you imagine the nightmares ? constructing this Request will be very complex but with propertyWrappers it's very very simple. Let's take a look at example Request that does this.
 
 ```swift
@@ -296,25 +296,19 @@ extension MimeType {
 #### Using Connect
 Connect allows you to either do a normal request or do an upload task and it's defined with the following method signatures
 ```swift
-public func request(request: Request, debugResponse: Bool = false) -> Future<Data>
-public func request(multipartRequest: MultipartRequest, debugResponse: Bool = false) -> Future<Data>
+public func request(request: Request, debugResponse: Bool = false) async throws -> Response
+public func request(multipartRequest: MultipartRequest, debugResponse: Bool = false) async throws -> Response
 ```
-
-After doing all the chaining for Future you finally call .observe which is an async closure that has one variable Result<Type, Error> whereas  the Type is the final data type returned from your Futures Chain.
-
 
 ##### Example for the Request provided above
 ```swift
-Connect.default.request(request: GetTodoRequest(id: 123), debugResponse: true).decoded(toType: Todo.self).observe { result in
-    switch result {
-    case .success(let todo):
-        print(todo)
-    case .failure(let error):
-        print(error)
-    }
+do {
+    let todo = try await Connect.default.request(request: GetTodoRequest(id: 123), debugResponse: true).decoded(toType: Todo.self)
+    print(todo)
+} catch {
+    debugPrint(error)
 }
 ```
-The observe closure here will be of type Result<Todo, Error>
 
 ---
 
@@ -403,9 +397,50 @@ To use the above module you can simply do the following
 
 ```swift
 let request = PostModule.get(postId: "123").request
-Connect.default.request(request: request, debugResponse: true).observe { result in
-    print(result)
+
+do {
+    try await Connect.default.request(request: request, debugResponse: true)
+} catch {
+    debugPrint(error)
 }
 ```
 
 Building modules is totally optional and you are free to either do it or not, it's simply a better way to express your requests under a certain "namespace"
+
+#### Cancelling Requests
+
+Cancelling requests is pretty much necessary nowadays and most of the abstraction layers that are build don't account for request cancellation, So what if we are doing a search and we'd like to cancel previous requests if two requests run simultaneously.
+
+
+Instead of using the `request` method, we'll instead use another two methods the first one being
+
+`public func makeDataTask(request: Requestable) -> DataTask<Data>`
+
+and the second one being
+
+`public func execute(task: DataTask<Data>, debugResponse: Bool = false) async throws -> Response`
+
+- We'll create a Task
+- Store it somewhere so that we can cancel it later
+- Execute the task using the method above
+
+```swift
+class ViewModel {
+    //...Your Implementation
+    private var task: DataTask<Data>?
+    
+    func search(term: String) async throws {
+        task?.cancel()
+        task = nil
+        let request = PostModule.search(term: term).request
+        task = Connect.default.makeDataTask(request: request)
+        let results = try await Connect.default.execute(task: task!).decoded(toType: [Post.self])
+        print(results)
+    }
+}
+
+```
+
+Similarly there's a function to create a DataTask for multipart requests so that you can cancel your upload requests if user does a certain action for example
+
+`public func makeUploadTask(request: Requestable) -> DataTask<Data>`

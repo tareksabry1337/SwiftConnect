@@ -26,12 +26,12 @@ import Foundation
 import Alamofire
 
 public protocol ErrorHandlerProtocol {
-    func handle(response: [String: Any], statusCode: Int) -> Error?
+    func handle(response: [String: Any], statusCode: Int) throws
 }
 
 open class ErrorHandler: ErrorHandlerProtocol {
     
-    public func handle(response: [String: Any], statusCode: Int) -> Error? {
+    public func handle(response: [String: Any], statusCode: Int) throws {
         let message: String
         if let error = response["msg"] as? String {
             message = error
@@ -45,7 +45,7 @@ open class ErrorHandler: ErrorHandlerProtocol {
             message = "Something went wrong"
         }
         
-        return NSError(domain: "", code: statusCode, userInfo: [
+        throw NSError(domain: "", code: statusCode, userInfo: [
             NSLocalizedDescriptionKey: message
         ])
     }
@@ -60,8 +60,6 @@ public final class Connect {
     
     private lazy var session: Session = middleware.session
     
-    private var cancellables = [String: DataRequest]()
-    
     public static let `default`: Connect = Connect()
     
     public var isLoggingEnabled: Bool
@@ -74,32 +72,25 @@ public final class Connect {
         self.middleware = middleware
         self.errorHandler = errorHandler
         self.isLoggingEnabled = isLoggingEnabled
-        
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(cancelRequest(_:)),
-            name: .cancelRequest,
-            object: nil
-        )
     }
     
-    private func parseResponse(response: AFDataResponse<Data>) -> Error? {
+    private func parseResponse(response: AFDataResponse<Data>) throws {
         
         if case .some(AFError.explicitlyCancelled) = response.error {
-            return nil
+            return
         }
         
         if case .failure(let errorResult) = response.result {
             if case .sessionTaskFailed(let error) = errorResult {
                 switch error.code {
                 case URLError.dataNotAllowed.rawValue, URLError.notConnectedToInternet.rawValue:
-                    return ConnectError.notConnectedToInternet
+                    throw ConnectError.notConnectedToInternet
                     
                 case URLError.timedOut.rawValue:
-                    return ConnectError.timedOut
+                    throw ConnectError.timedOut
                     
                 default:
-                    return ConnectError.internalServerError
+                    throw ConnectError.internalServerError
                 }
             }
         }
@@ -113,135 +104,106 @@ public final class Connect {
                     options: []
                 ) as? [String: AnyObject]
             else {
-                return ConnectError.internalServerError
+                throw ConnectError.internalServerError
             }
             
-            return errorHandler.handle(response: response, statusCode: statusCode)
+            return try errorHandler.handle(response: response, statusCode: statusCode)
         }
-        
-        return nil
     }
     
-    public func request(request: Requestable, debugResponse: Bool = false) -> Future<Response> {
-        let dataRequest = session.request(request).cURLDescription(calling: debugLog)
-        let promise = Promise<Response>(requestIdentifier: dataRequest.id.uuidString)
-        
-        dataRequest.validate().responseData { [weak self] response in
-            guard let self = self else { return }
-            
-            if self.isLoggingEnabled && debugResponse {
-                let statusCode = response.response?.statusCode ?? 0
-                let url = response.request?.url?.absoluteString ?? ""
-                let elapsedTime = response.metrics?.taskInterval.duration ?? 0.0
-                print("\(statusCode) '\(url)' [\(String(format: "%.04f", elapsedTime)) s]:")
-                print((response.data ?? Data()).prettyPrintedJSONString ?? "")
-            }
-            
-            if let error = self.parseResponse(response: response) {
-                promise.reject(with: error)
-                return
-            }
-            
-            switch response.result {
-            case .success(let data):
-                
-                guard let request = response.request, let httpURLResponse = response.response else {
-                    promise.reject(with: ConnectError.internalServerError)
-                    return
-                }
-                
-                let response = Response(request: request, response: httpURLResponse, data: data)
-                promise.resolve(with: response)
-                
-            case .failure(let error):
-                promise.reject(with: error)
-            }
+    public func makeDataTask(request: Requestable) -> DataTask<Data> {
+        return session
+            .request(request)
+            .cURLDescription(calling: debugLog)
+            .serializingData()
+    }
+    
+    public func makeUploadTask(request: Requestable) -> DataTask<Data> {
+        guard
+            let multipartRequest = request as? MultipartRequest
+        else {
+            fatalError("Incorrect request type passed to function, expected type \(MultipartRequest.self), found \(type(of: request))")
         }
         
-        cancellables[dataRequest.id.uuidString] = dataRequest
+        let multipartFormData = MultipartFormData()
         
-        return promise
+        multipartRequest.files.forEach { file in
+            multipartFormData.append(
+                file.data,
+                withName: file.key,
+                fileName: file.name,
+                mimeType: file.mimeType.rawValue
+            )
+        }
+        
+        multipartRequest.parameters.forEach { parameter in
+            multipartFormData.append("\(parameter.value)".data(using: .utf8) ?? Data(), withName: parameter.key)
+        }
+        
+        return session
+            .upload(multipartFormData: multipartFormData, with: multipartRequest)
+            .cURLDescription(calling: debugLog)
+            .serializingData()
+    }
+    
+    public func execute(task: DataTask<Data>, debugResponse: Bool = false) async throws -> Response {
+        let response = await task.response
+
+        if isLoggingEnabled && debugResponse {
+            log(response: response)
+        }
+        
+        return try createResponse(from: response)
+    }
+    
+    public func request(request: Requestable, debugResponse: Bool = false) async throws -> Response {
+        let dataTask = makeDataTask(request: request)
+        return try await execute(task: dataTask, debugResponse: debugResponse)
     }
     
     public func request(
         multipartRequest: Requestable,
-        debugResponse: Bool = false,
-        progressHandler: Alamofire.Request.ProgressHandler? = nil
-    ) -> Future<Response> {
-        guard
-            let multipartRequest = multipartRequest as? MultipartRequest
-        else {
-            fatalError("Incorrect request type passed to function, expected type \(MultipartRequest.self), found \(type(of: multipartRequest))")
+        debugResponse: Bool = false
+    ) async throws -> Response {
+        let uploadTask = makeUploadTask(request: multipartRequest)
+        return try await execute(task: uploadTask, debugResponse: debugResponse)
+    }
+    
+    private func log(response: DataResponse<Data, AFError>) {
+        let statusCode = response.response?.statusCode ?? 0
+        let url = response.request?.url?.absoluteString ?? ""
+        let elapsedTime = response.metrics?.taskInterval.duration ?? 0.0
+        print("\(statusCode) '\(url)' [\(String(format: "%.04f", elapsedTime)) s]:")
+        print((response.data ?? Data()).prettyPrintedJSONString ?? "")
+    }
+    
+    private func createResponse(from response: DataResponse<Data, AFError>) throws -> Response {
+        try parseResponse(response: response)
+        
+        switch response.result {
+        case .success(let data):
+            guard
+                let request = response.request,
+                let httpURLResponse = response.response
+            else {
+                throw ConnectError.internalServerError
+            }
+            
+            let response = Response(
+                request: request,
+                response: httpURLResponse,
+                data: data
+            )
+            
+            return response
+            
+        case .failure(let error):
+            throw error
         }
-        
-        let uploadRequest = session.upload(multipartFormData: { formData in
-            
-            multipartRequest.files.forEach { file in
-                formData.append(
-                    file.data,
-                    withName: file.key,
-                    fileName: file.name,
-                    mimeType: file.mimeType.rawValue
-                )
-            }
-            
-            multipartRequest.parameters.forEach { parameter in
-                formData.append("\(parameter.value)".data(using: .utf8) ?? Data(), withName: parameter.key)
-            }
-            
-        }, with: multipartRequest)
-        
-        if let progressHandler = progressHandler {
-            uploadRequest.uploadProgress(queue: .main, closure: progressHandler)
-        }
-        
-        let promise = Promise<Response>(requestIdentifier: uploadRequest.id.uuidString)
-        
-        uploadRequest.cURLDescription(calling: debugLog).validate().responseData { [weak self] response in
-            guard let self = self else { return }
-            
-            if self.isLoggingEnabled && debugResponse {
-                let statusCode = response.response?.statusCode ?? 0
-                let url = response.request?.url?.absoluteString ?? ""
-                let elapsedTime = response.metrics?.taskInterval.duration ?? 0.0
-                print("\(statusCode) '\(url)' [\(String(format: "%.04f", elapsedTime)) s]:")
-                print((response.data ?? Data()).prettyPrintedJSONString ?? "")
-            }
-            
-            if let error = self.parseResponse(response: response) {
-                promise.reject(with: error)
-                return
-            }
-            
-            switch response.result {
-            case .success(let data):
-                
-                guard let request = response.request, let httpURLResponse = response.response else {
-                    promise.reject(with: ConnectError.internalServerError)
-                    return
-                }
-                
-                let response = Response(request: request, response: httpURLResponse, data: data)
-                promise.resolve(with: response)
-                
-            case .failure(let error):
-                promise.reject(with: error)
-            }
-        }
-        
-        cancellables[uploadRequest.id.uuidString] = uploadRequest
-        
-        return promise
     }
     
     public func cancelAllRequests() {
         session.cancelAllRequests()
-    }
-    
-    @objc private func cancelRequest(_ notification: NSNotification) {
-        guard let requestIdentifier = notification.userInfo?["requestIdentifier"] as? String else { return }
-        cancellables[requestIdentifier]?.cancel()
-        cancellables[requestIdentifier] = nil
     }
     
     private func debugLog(description: String) {
@@ -252,7 +214,4 @@ public final class Connect {
         }
     }
     
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
 }

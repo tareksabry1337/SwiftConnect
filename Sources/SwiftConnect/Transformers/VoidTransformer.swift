@@ -24,10 +24,8 @@
 
 import Foundation
 
-public extension Future where Value == Response {
-    func asVoid() -> Future<Void> {
-        return transformed { _ in
-            return ()
-        }
+public extension Response {
+    func asVoid() {
+        
     }
 }

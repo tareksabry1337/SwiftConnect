@@ -24,10 +24,8 @@
 
 import Foundation
 
-public extension Future where Value == Response {
-    func asString() -> Future<String> {
-        return transformed { response in
-            return String(data: response.data, encoding: .utf8) ?? ""
-        }
+public extension Response {
+    func asString() -> String {
+        return String(data: data, encoding: .utf8) ?? ""
     }
 }

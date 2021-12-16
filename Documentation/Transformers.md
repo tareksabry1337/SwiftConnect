@@ -4,8 +4,8 @@
 
 #### Codable Transformer
 ```swift
-public extension Future where Value == Data {
-    func decoded<NextValue: Decodable>(toType type: NextValue.Type, keyPath: String = "") -> Future<NextValue>
+public extension Response {
+    func decoded<Model: Decodable>(toType type: Model.Type, keyPath: String = "") throws -> Model
 }
 ```
 
@@ -54,12 +54,12 @@ This will eliminate all the boilerplate in your models and allows for a clear an
 
 #### Dictionary Transformer
 ```swift
-public extension Future where Value == Data {
-    func dictionary() -> Future<[String: AnyObject]>
+public extension Response {
+    func dictionary() -> [String: AnyObject]
 }
 
-public extension Future where Value == Data {
-    func get<NextValue>(key: String, ofType type: NextValue.Type) -> Future<NextValue?>
+public extension Response {
+    func get<Value>(key: String, ofType type: Value.Type) -> Value?
 }
 ```
 
@@ -69,90 +69,12 @@ With dictionary transformer you may want to create a dictionary from the respons
 
 #### Void Transformer
 ```swift
-public extension Future where Value == Data {
-    func asVoid() -> Future<Void>
+public extension Response {
+    func asVoid()
 }
 ```
 
 With void transformer you may want to ignore the content of the response altogether and just care about its error in case of a failure therefore the void transformer is created specifically for that.
-
----
-
-#### Reactive Transformers
-
-Do you like to use any reactive programming library ? (RxSwift / Bond / ReactiveSwift)
-SwiftConnect also supports transforming for its Future / Promise type to any kind of  `Observable`  you'd need
-
-Here are two examples for such transformation
-
-```swift
-import Foundation
-import SwiftConnect
-import Bond
-import ReactiveKit
-
-public extension Future {
-    func asSignal() -> Signal<Value, Error> {
-        return Signal { observer in
-            self.observe { result in
-                switch result {
-                case .success(let value):
-                    observer.on(.next(value))
-                    observer.on(.completed)
-                    
-                case .failure(let error):
-                    observer.on(.failed(error))
-                }
-            }
-            return SimpleDisposable(isDisposed: false)
-        }
-    }
-}
-```
-
-```swift
-import Foundation
-import SwiftConnect
-import RxSwift
-
-public extension Future {
-    func asObservable() -> Observable<Value> {
-        return Observable.create { observer in
-
-            self.observe { result in
-                switch result {
-                case .success(let value):
-                    observer.onNext(value)
-                    observer.onCompleted()
-                    
-                case .failure(let error):
-                    observer.onError(error)
-                }
-            }
-
-            return Disposables.create {
-                self.cancel()
-            }
-        }
-    }
-}
-
-public extension Future {
-    func asSingle() -> Single<Value> {
-        asObservable()
-            .asSingle()
-    }
-}
-
-public extension Future {
-    func asCompletable() -> Completable {
-        asSingle()
-            .asCompletable()
-    }
-}
-```
-
-Super easy !
 
 ---
 
@@ -162,24 +84,21 @@ The core power of SwiftConnect is the ability to create your own transformers wh
 Let's take a look on how can we create a String Transformer that transforms Data to String.
 
 ```swift
-extension Future where Value == Data {
-    func asString() -> Future<String> {
-        return transformed {
-            return String(data: $0, encoding: .utf8) ?? ""
-        }
+extension Response {
+    func asString() -> String {
+        return String(data: data, encoding: .utf8) ?? ""
     }
 }
 ```
-
-Very simple isn't it ? create an extension of Future where Value == Data then do your transformation on a function of your name choice.
+Very simple isn't it ? You are literally just extending a struct and implementing functions of your own choice !
 
 Maybe we want to transform this String into a URL directly ?
+
 ```swift
-extension Future where Value == String {
-    func asURL() -> Future<URL?> {
-        return transformed {
-            return URL(string: $0)
-        }
+extension Response {
+    func asURL() -> URL? {
+        let string = self.asString()
+        return URL(string: string)
     }
 }
 ```
@@ -189,8 +108,11 @@ And you can keep chaining this as long as you want as long as you are matching t
 Then you can simply chain the call by doing
 
 ```swift
-Connect.default.request(request: ExampleModule.example.request).asString().asURL().observe { result in
-    //result here will be of type Result<URL?, Error>
+do {
+    let url = try await Connect.default.request(request: ExampleModule.example.request).asURL()
+    print(url)
+} catch {
+    debugPrint(error)
 }
 ```
 
