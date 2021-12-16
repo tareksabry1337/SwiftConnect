@@ -20,8 +20,8 @@ This makes it really easy to find out what's wrong with your request at glance, 
 Further more if you want to debug the response Connect provides a parameter called "debugResponse" in the following methods
 
 ```swift
-public func request(request: Requestable, debugResponse: Bool = false) -> Future<Data>
-public func request(multipartRequest: Requestable, debugResponse: Bool = false) -> Future<Data>
+public func request(request: Requestable, debugResponse: Bool = false) async throws -> Response
+public func request(multipartRequest: Requestable, debugResponse: Bool = false) async throws -> Response
 ```
 If you flip the switch and toggle debugResponse to true (it's defaulted to false) the entire response will be printed to the console whether it's success or failure allowing for a better visibility when debugging.
 

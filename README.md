@@ -31,13 +31,14 @@ SwiftConnect is a lightweight network abstraction layer, built on top of Alamofi
     - [Using Connect](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#Using-Connect)
     - [Module](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#Module)
     - [Building Modules](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#Building-Modules)
+    - [Cancelling Requests](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Usage.md#Cancelling-Requests)
 - [Debugging](https://github.com/tareksabry1337/SwiftConnect/blob/main/Documentation/Debugging.md)
 
 ## Requirements
 
-- iOS 10.0+
-- Xcode 12+
-- Swift 5.0+
+- iOS 13.0+
+- Xcode 13.2+
+- Swift 5.5+
 
 ## Installation
 
@@ -46,7 +47,7 @@ it, simply add the following line to your Package.swift:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/tareksabry1337/SwiftConnect.git", .upToNextMajor(from: "2.0.0"))
+    .package(url: "https://github.com/tareksabry1337/SwiftConnect.git", .upToNextMajor(from: "3.0.0"))
 ]
 ```
 
@@ -59,15 +60,10 @@ Please, don't hesitate to [file an issue](https://github.com/tareksabry1337/Swif
 - [ ] OAuth2 Support
 - [ ] Support for downloading tasks
 - [ ] Support for handling refresh tokens.
-- [ ] Async / Await support
 
 ## Dependncies
-SwiftConnect depends mainly on two things
+SwiftConnect doesn't have any depedency except Alamofire
 
-The awesome Future/Promises built by  [John Sundell][Future/Promises]<br>
-Alamofire [Alamofire][Alamofire]
-
-[Future/Promises]: https://github.com/JohnSundell/SwiftBySundell/blob/master/Blog/Under-the-hood-of-Futures-and-Promises.swift
 [Alamofire]: https://github.com/Alamofire/Alamofire
 
 Everything else was built from scratch natively and using Swift's Modern APIs

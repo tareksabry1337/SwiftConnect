@@ -60,8 +60,6 @@ public final class Connect {
     
     private lazy var session: Session = middleware.session
     
-    private var cancellables = [String: DataRequest]()
-    
     public static let `default`: Connect = Connect()
     
     public var isLoggingEnabled: Bool
