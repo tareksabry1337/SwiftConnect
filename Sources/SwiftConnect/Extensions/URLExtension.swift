@@ -57,7 +57,7 @@ extension URL {
         urlSafePattern = pattern.replacingOccurrences(of: "key", with: key)
         urlString = urlString.replacingOccurrences(of: urlSafePattern, with: "\(value)")
 
-        guard let url = URL(string: urlString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)) else { return self }
+        guard let url = URL(string: urlString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "") else { return self }
         return url
     }
 
