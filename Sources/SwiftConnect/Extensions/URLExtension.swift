@@ -41,7 +41,7 @@ extension URL {
             urlString = urlString.replacingOccurrences(of: urlSafePattern, with: "\(parameter.value)")
         }
 
-        guard let url = URL(string: urlString) else { return self }
+        guard let url = URL(string: urlString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "") else { return self }
         return url
     }
 
