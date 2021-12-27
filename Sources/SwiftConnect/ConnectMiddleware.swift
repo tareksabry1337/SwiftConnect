@@ -33,7 +33,7 @@ public protocol ConnectMiddlewareProtocol: RequestAdapter, RequestRetrier {
 
 open class ConnectMiddleware: ConnectMiddlewareProtocol {
 
-    lazy public var session: Session = {
+    lazy open var session: Session = {
         let configuration = URLSessionConfiguration.default
         configuration.httpAdditionalHeaders = HTTPHeaders.default.dictionary
         configuration.timeoutIntervalForResource = 60
@@ -44,7 +44,7 @@ open class ConnectMiddleware: ConnectMiddlewareProtocol {
 
     public init() {}
 
-    public func adapt(
+    open func adapt(
         _ urlRequest: URLRequest,
         for session: Session,
         completion: @escaping (Result<URLRequest, Error>) -> Void
@@ -52,7 +52,7 @@ open class ConnectMiddleware: ConnectMiddlewareProtocol {
         completion(.success(urlRequest))
     }
     
-    public func retry(
+    open func retry(
         _ request: Alamofire.Request,
         for session: Session,
         dueTo error: Error,
