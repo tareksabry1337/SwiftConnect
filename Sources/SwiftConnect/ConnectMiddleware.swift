@@ -27,22 +27,21 @@ import Alamofire
 
 typealias RequestRetryCompletion = (RetryResult) -> Void
 
-public protocol ConnectMiddlewareProtocol: RequestAdapter, RequestRetrier {
+public protocol ConnectMiddlewareProtocol: RequestInterceptor {
     var session: Session { get }
 }
 
 open class ConnectMiddleware: ConnectMiddlewareProtocol {
 
-    lazy open var session: Session = {
+    public let session: Session
+
+    public init() {
         let configuration = URLSessionConfiguration.default
         configuration.httpAdditionalHeaders = HTTPHeaders.default.dictionary
         configuration.timeoutIntervalForResource = 60
         configuration.timeoutIntervalForRequest = 60
-        let session = Session(configuration: configuration, interceptor: Interceptor(adapter: self, retrier: self))
-        return session
-    }()
-
-    public init() {}
+        session = Session(configuration: configuration)
+    }
 
     open func adapt(
         _ urlRequest: URLRequest,

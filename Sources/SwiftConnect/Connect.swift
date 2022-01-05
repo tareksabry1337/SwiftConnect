@@ -58,7 +58,7 @@ public final class Connect {
     private let middleware: ConnectMiddlewareProtocol
     private let errorHandler: ErrorHandlerProtocol
     
-    private lazy var session: Session = middleware.session
+    private let session: Session
     
     public static let `default`: Connect = Connect()
     
@@ -72,6 +72,7 @@ public final class Connect {
         self.middleware = middleware
         self.errorHandler = errorHandler
         self.isLoggingEnabled = isLoggingEnabled
+        self.session = middleware.session
     }
     
     private func parseResponse(response: AFDataResponse<Data>) throws {
@@ -113,7 +114,7 @@ public final class Connect {
     
     public func makeDataTask(request: Requestable) -> DataTask<Data> {
         return session
-            .request(request)
+            .request(request, interceptor: middleware)
             .cURLDescription(calling: debugLog)
             .serializingData()
     }
@@ -141,7 +142,11 @@ public final class Connect {
         }
         
         return session
-            .upload(multipartFormData: multipartFormData, with: multipartRequest)
+            .upload(
+                multipartFormData: multipartFormData,
+                with: multipartRequest,
+                interceptor: middleware
+            )
             .cURLDescription(calling: debugLog)
             .serializingData()
     }
