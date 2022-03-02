@@ -116,6 +116,7 @@ public final class Connect {
         return session
             .request(request, interceptor: middleware)
             .cURLDescription(calling: debugLog)
+            .validate()
             .serializingData()
     }
     
@@ -148,6 +149,7 @@ public final class Connect {
                 interceptor: middleware
             )
             .cURLDescription(calling: debugLog)
+            .validate()
             .serializingData()
     }
     
