@@ -40,9 +40,11 @@ extension URL {
             urlSafePattern = urlSafePattern.replacingOccurrences(of: "key", with: parameter.key)
             urlString = urlString.replacingOccurrences(of: urlSafePattern, with: "\(parameter.value)")
         }
+        
+        urlString = urlString
+            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
 
-        guard let url = URL(string: urlString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "") else { return self }
-        return url
+        return URL(string: urlString) ?? self
     }
 
     func withPathParameter(pattern: String, _ key: String, value: Any) -> URL {
@@ -55,10 +57,12 @@ extension URL {
         var urlString = absoluteString
         
         urlSafePattern = pattern.replacingOccurrences(of: "key", with: key)
-        urlString = urlString.replacingOccurrences(of: urlSafePattern, with: "\(value)")
-
-        guard let url = URL(string: urlString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "") else { return self }
-        return url
+        
+        urlString = urlString
+            .replacingOccurrences(of: urlSafePattern, with: "\(value)")
+            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        
+        return URL(string: urlString) ?? self
     }
 
 }

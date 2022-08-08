@@ -76,7 +76,6 @@ public final class Connect {
     }
     
     private func parseResponse(response: AFDataResponse<Data>) throws {
-        
         if case .some(AFError.explicitlyCancelled) = response.error {
             return
         }

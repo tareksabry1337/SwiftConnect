@@ -64,7 +64,6 @@ extension Data {
     }
 
     var contentType: ContentType {
-
         var values = [UInt8](repeating: 0, count: 1)
 
         copyBytes(to: &values, count: 1)

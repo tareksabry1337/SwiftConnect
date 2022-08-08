@@ -27,6 +27,7 @@ import Foundation
 public extension Dictionary {
     func valueForKeyPath(keyPath: String) -> AnyObject? {
         var keys = keyPath.components(separatedBy: ".")
+        
         guard
             let first = keys.first as? Key
         else {
@@ -35,11 +36,14 @@ public extension Dictionary {
         }
 
         guard let value = self[first] else { return nil }
+        
         keys.remove(at: 0)
+        
         if !keys.isEmpty, let subDict = value as? [NSObject: AnyObject] {
             let rejoined = keys.joined(separator: ".")
             return subDict.valueForKeyPath(keyPath: rejoined)
         }
+        
         return value as AnyObject
     }
 }

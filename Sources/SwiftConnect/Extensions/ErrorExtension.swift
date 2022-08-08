@@ -25,7 +25,7 @@
 import Foundation
 
 extension Error {
-    var code: Int {
+    public var code: Int {
         return (self as NSError).code
     }
 }

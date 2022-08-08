@@ -23,4 +23,4 @@ The `Response` object is composed of the following parameters:
  
  And since we now know that there's no assumption for the returned response a few handy `Transformers` have been created in order to convert from `Response` type to different things (Codable / String / Dictionary..)
 
-Check this link for more information about [**Transformers**](https://github.com/tareksabry1337/SwiftConnect/blob/master/Transformers.md)
+Check this link for more information about [**Transformers**](https://github.com/tareksabry1337/SwiftConnect/blob/main/Transformers.md)

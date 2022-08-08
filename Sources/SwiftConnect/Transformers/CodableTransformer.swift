@@ -36,7 +36,6 @@ public extension Response {
             } else {
                 return try decoder.decode(Model.self, from: data, keyPath: keyPath)
             }
-
         } catch {
             throw error
         }
@@ -53,7 +52,6 @@ public extension Response {
             } else {
                 return decoder.decodeIfPresent(Model.self, from: data, keyPath: keyPath)
             }
-
         } catch {
             throw error
         }

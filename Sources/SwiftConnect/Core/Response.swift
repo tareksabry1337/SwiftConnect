@@ -28,7 +28,6 @@ import Alamofire
 public typealias HTTPHeaders = Alamofire.HTTPHeaders
 
 public struct Response {
-
     public let request: URLRequest
     public let statusCode: Int
     public let headers: HTTPHeaders
